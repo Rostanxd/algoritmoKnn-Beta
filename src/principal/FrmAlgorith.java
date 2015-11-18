@@ -259,7 +259,7 @@ public class FrmAlgorith extends javax.swing.JFrame {
                     Data dObject = new Data();
                     //  Storing Code and Value of the DATA Object
                     dObject.setCode(fea);   //  Setting the code (ArrayList)
-                    dObject.setValue(Integer.parseInt(cutString[6]));   //  Settig the value
+                    dObject.setValue(Integer.parseInt(cutString[10]));   //  Settig the value, Basarse en el numero de Feaures.
                     //  Adding the DATA object to the ArrayList
                     this.data.add(dObject);  //  Add to the ArrayList
                     

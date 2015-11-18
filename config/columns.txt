@@ -4,4 +4,8 @@
 4::Multi-Touch
 5::SPhone
 6::Tablet
-7::Value
+7::Sensor
+8::GPS
+9::ScanF
+10::Android
+11::Value

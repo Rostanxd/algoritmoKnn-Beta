@@ -5,7 +5,10 @@
  */
 package principal;
 
+import entities.Data;
 import entities.DataReview;
+import entities.Feature;
+import entities.Results;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.Vector;
@@ -19,6 +22,7 @@ import javax.swing.table.DefaultTableModel;
 public class FrmResult extends javax.swing.JFrame {
     
     private ArrayList<DataReview> dataRvw = new ArrayList<DataReview>();
+    private ArrayList<Results> arrResFinal = new ArrayList<Results>();
     
     
     /**
@@ -26,12 +30,108 @@ public class FrmResult extends javax.swing.JFrame {
      */
     public FrmResult(ArrayList<DataReview> dataRvw) {
         this.dataRvw = dataRvw;
+        ArrayList<Results> arrRes = new ArrayList<Results>();
+        // ArrayList<Results> arrResFinal = new ArrayList<Results>();
+        Results resLower = null;
         initComponents();
         
         Iterator<DataReview> itrDr = this.dataRvw.iterator();
         while(itrDr.hasNext()){
             DataReview dr = itrDr.next();
-            System.out.println("code"+dr.getCode()+" ave "+dr.getAverage());
+            String code = dr.getCode();
+            float ave = dr.getAverage();
+            
+            //  Data
+            Results r = new Results();
+            ArrayList<Feature> arrFea = new ArrayList<Feature>(); //Array de Features
+            
+            // System.out.println("code: "+code+" ave: "+ave);
+            
+            int limit = 1; // Cut String limite
+            for (int i = 0; i < code.length()-1; i++) {
+                Feature f = new Feature();
+                f.setFtr(Integer.parseInt(code.substring(i,limit)));
+                limit += 1;
+                
+                arrFea.add(f);
+            }
+            
+            r.setCode(arrFea);
+            r.setAve(ave);
+            
+            arrRes.add(r);
+        }
+        
+//        Iterator<Results> itrRes = arrRes.iterator();
+//        while (itrRes.hasNext()){
+//            Results res = itrRes.next();
+//            ArrayList<Feature> arrFea2 = res.getCode();
+//            float ave = res.getAve();
+//            
+//            System.out.print("ArrayFeatures: ");
+//            Iterator<Feature> itrFea = arrFea2.iterator();
+//            while (itrFea.hasNext()) {
+//                Feature f = itrFea.next();
+//                System.out.print(f.getFtr());
+//            }
+//            System.out.println(" Average: "+res.getAve());
+//        }
+        
+        resLower = arrRes.get(0);    //  Take teh lower result to get the neighbors.
+        
+        Iterator<Results> itrRes = arrRes.iterator();
+        while (itrRes.hasNext()){
+            Results res = itrRes.next();
+            ArrayList<Feature> arrFeaRes = res.getCode();
+            float ave = res.getAve();
+            
+            ArrayList<Feature> arrFeaRLower = resLower.getCode();
+            
+            int cont = 0;
+            
+            for (int i = 0; i < arrFeaRes.size(); i++) {
+                if (arrFeaRes.get(i).getFtr()!=arrFeaRLower.get(i).getFtr()) {
+                    // System.out.println("AR: "+arrFeaRes.get(i).getFtr()+" >> "+arrFeaRLower.get(i).getFtr());
+                    cont += 1;
+                }
+            }
+            
+            // System.out.println("");
+            
+            //  Create de Result Final
+            Results resFinal = new Results();
+            resFinal.setCode(arrFeaRes);
+            resFinal.setAve(ave);
+            resFinal.setDist(cont);
+            
+            if(cont!=0){
+                this.arrResFinal.add(resFinal);
+            }
+        }
+        
+
+        System.out.println("<< RESULTS >>");
+        System.out.print("Lower Node: ");
+        Iterator<Feature> itrFeaResLow = resLower.getCode().iterator();
+        while (itrFeaResLow.hasNext()) {
+            System.out.print(itrFeaResLow.next().getFtr()); 
+        }
+        System.out.println("");
+        
+        Iterator<Results> itrResFinal = this.arrResFinal.iterator();
+        while (itrResFinal.hasNext()) {
+            Results r = itrResFinal.next();
+            ArrayList<Feature> arrFea = r.getCode();
+            float ave = r.getAve();
+            int dist = r.getDist();
+            
+            System.out.print("Features: ");
+            Iterator<Feature> itrArrFea = arrFea.iterator();
+            while (itrArrFea.hasNext()) {
+                Feature f = itrArrFea.next();
+                System.out.print(f.getFtr());
+            }
+            System.out.println(" Average: "+ave+" Distance: "+dist);
         }
         
         //  take the first object DataReview cause it's lower.
@@ -96,7 +196,7 @@ public class FrmResult extends javax.swing.JFrame {
 
             },
             new String [] {
-                "Code", "Average"
+                "Code", "Average", "Distance", "Coefficient Proximity"
             }
         ));
         jScrollPane1.setViewportView(jTResults);
@@ -174,17 +274,26 @@ public class FrmResult extends javax.swing.JFrame {
         
         if (!KnnNo.getText().equals("")){
             try{
-                for (int i = 1; i <= Integer.parseInt(KnnNo.getText()); i++) {
-                    DataReview dr = this.dataRvw.get(i);
+                for (int i = 0; i <= Integer.parseInt(KnnNo.getText()); i++) {
+                    Results r = this.arrResFinal.get(i);
                     Vector fila = new Vector();
 
-                    String code = dr.getCode();
-                    Float ave = dr.getAverage();
-
+                    String code = "";
+                    
+                    ArrayList<Feature> arrFea = r.getCode();
+                    Iterator<Feature> itrFea = arrFea.iterator();
+                    while (itrFea.hasNext()) {
+                        code += itrFea.next().getFtr();
+                    }
+                    
                     fila.add(code);
-                    fila.add(ave);
+                    fila.add(r.getAve());
+                    fila.add(r.getDist());
+                    fila.add(r.getCoffPro());
 
                     dtm.addRow(fila);
+                    
+                    code = "";
                 }
             }catch(Exception e){
                 JOptionPane.showMessageDialog(null, 
